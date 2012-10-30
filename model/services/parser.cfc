@@ -4,13 +4,27 @@
 	<cfreturn this>
 </cffunction>
 
+<cffunction name="prepareRequest" access="public" output="false" returnType="string">
+	<cfargument name="str" type="string" required="true" hint="">
+	<cfset var request = str>
+	<cfset var request = trim(request)>
+	<cfset var request = urlDecode(request)>
+	<cfset var request = replaceNoCase(request, "("," (", "all")>
+	<cfreturn request>
+</cffunction>
+
+
+
+
+
 <cffunction name="parseCommand" access="public" output="false" returnType="struct">
 	<cfargument name="command" type="string" required="true" hint="">
 
-	<cfset var formatedRequestString = replaceNoCase(arguments.command, "("," (", "all")>
 	<cfset var completedRequest = structNew()>
-	<cfset var local = structNew()>
+
+	<cfset formatedRequestString = prepareRequest(command)>
 	
+	<cfset var local = structNew()>
 	<!--- these three fields determine the process --->
 	<cfset local.requestString = formatedRequestString>
 	<cfset local.command = ListFirst(formatedRequestString, " ")>
@@ -66,10 +80,16 @@
 
 	<!---<cfset var local = arguments.request>--->
 	<cfset var workingData = arguments.request>
-	
+
+	<cftry>
 	<cfset workingData.name = listGetAt(workingData.requestString, 2, " ")>
 	<cfset workingData.table = decamelcase(pluralize(workingData.name))>
-
+		
+		<cfcatch>
+			<cfabort showerror="#workingData.requestString# cannot be parsed!" >
+		</cfcatch>
+	</cftry>
+	
 	<cfreturn workingData>
 
 </cffunction>

@@ -1,40 +1,60 @@
 ﻿<cfcomponent extends="scaffoldUtility">
 
-	
-	
-<cffunction name="findComponent" output="false" access="public" returntype="string" hint="remove the ending s">
-   <cfargument name="string"  type="string" required="true"/>
-    <cfscript>   var newString = replaceNoCase(arguments.string, "_", " ");
-       newString = titleCase(newString);
-  	   newString = replaceNoCase(newString, " ", "");
-       newString = singularize(newString);
-	</cfscript>
-   
-   <cfreturn newString>
-   
+
+<cffunction name="init" access="public" output="false" returntype="any">
+	<cfargument name="dsn" type="string" required="false" default="">
+	<cfset variables.dsn = dsn>
+	<cfreturn this>
 </cffunction>
 
 
-
+<cffunction name="dropTable" returntype="void" access="public" >
+	<cfargument name="table">
 	
-<!--- get a query of tables in schema --->	
-<!--- currently a query, should be an array --->
+	<cfquery  datasource="#consoleConfig.dsn#">
+	drop table #consoleConfig.dbo#.#scaffoldService.deCamelCase(table)#
+	</cfquery>
+	
+</cffunction>  
+
+<cffunction name="dropColumn" returntype="void" access="public" >
+	<cfargument name="table">
+	
+</cffunction>  
+
+<cffunction name="dropSequence" returntype="void" access="public" >
+	<cfargument name="table">
+	
+	<cfquery  datasource="#consoleConfig.dsn#">
+	drop sequence #consoleConfig.dbo#.#scaffoldService.deCamelCase(table)#_seq
+	</cfquery>
+	
+</cffunction>  
+
+
+
+<cffunction name="getdsn" access="public" output="false" returntype="string">
+	<cfreturn variables.dsn>
+</cffunction>
+
+<cffunction name="setdsn" access="public" output="false" returntype="void">
+	<cfargument name="dsn" type="string" required="false" default="">
+	<cfset variables.dsn = dsn>
+</cffunction>
+
+
 <cffunction name="getTables" access="public" output="false" returntype="Query">
 	<cfargument name="filter" type="string" required="false" default="">
-	<cfargument name="match" type="string" required="false" default="exact">
-	
-	<cfset var table_table = "tabs">
-	
-	<!--- if stupid banner then change the way all other oracle databases work just for them --->				
-	<cfif variables.is_banner>
-		<cfset table_table = "dba_tables">
-	</cfif>
+	<cfargument name="match" type="string" required="false" default="wildcard">
 
 	<cfquery name="qTables" datasource="#variables.dsn#">
-		SELECT lower(table_name) AS name
-		FROM #table_table#
-		WHERE upper(table_name) LIKE '#ucase(arguments.filter)#<cfif arguments.match eq "wildcard">%</cfif>'
-		ORDER BY table_name
+		SELECT 
+		 table_name as name
+		FROM INFORMATION_SCHEMA.tables
+		<cfif len(filter)>
+			WHERE table_name LIKE '#arguments.filter#<cfif arguments.match eq "wildcard">%</cfif>'
+		</cfif>
+		ORDER BY name
 	</cfquery>
 
 	<cfreturn qTables />
@@ -46,44 +66,21 @@
 	<cfargument name="table" type="string" required="true">
 	<cfargument name="columns" type="string" required="false" hint="comma delimited list of column names to filter by">
 	
-	<cfset var col_table = "cols">
-	<cfdump var="#variables#">
-	<!--- if stupid banner then change the way all other oracle databases work just for them --->							
-	<cfif variables.is_banner>
-		<cfset col_table = "dba_tab_columns">
-	</cfif>
-
 	<cfquery name="qColumns" datasource="#variables.dsn#" debug="true">
-		SELECT
-		<!--- pass in a list of columns to return in the where in clause order --->
-		<cfif isDefined("arguments.columns")> 
-		  CASE lower(column_name)
-		  <cfloop from="1" to="#listLen(arguments.columns)#" index="i">
-		  		WHEN '#lcase(listGetAt(arguments.columns, i))#' THEN #i#
-		  </cfloop>
-		  END columnSortOrder,
-		  
-		  <cfelse>
-		  column_id as columnSortOrder,
-		</cfif>
 		
-			 lower(COLUMN_NAME) AS name,
-			 lower(DATA_TYPE) AS type,
-			 DATA_LENGTH AS length,
-			 DATA_PRECISION AS precision,
-			 DATA_SCALE AS scale,
-			 NULLABLE as NULLABLE,
-			 data_default as defaultData
-		FROM #col_table#
-		WHERE upper(table_name) = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ucase(arguments.table)#">
-		
-		<cfif isDefined("arguments.columns")>
-			AND upper(COLUMN_NAME) IN ( <cfqueryparam cfsqltype="cf_sql_varchar" value="#uCase(arguments.columns)#" list="true" separator="," > )
-		<cfelse>
-			AND upper(COLUMN_NAME) NOT IN ( <cfqueryparam cfsqltype="cf_sql_varchar" value="ID,SORT_ORDER" list="true" separator="," > )
-		</cfif>
-		
-		order by columnSortOrder
+		SELECT 
+			column_name as name,
+			column_default as defaultValue,
+			column_default as dataDefault,
+			data_type as type,
+			character_maximum_length as length,
+			numeric_precision as precision,
+			numeric_scale as scale,
+			is_nullable as nullable
+			
+			
+			FROM INFORMATION_SCHEMA.Columns 
+			WHERE table_name = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.table#">
 	</cfquery>
 
 	<cfreturn qColumns />
@@ -95,19 +92,12 @@
 <cffunction name="getPrimaryColumn" access="public" output="false" returntype="string">
 	<cfargument name="table" type="string" required="true">
 
-	<cfset primaryColumn = "name">
-	<cfset var col_table = "cols">
-			
-		<cfif variables.is_banner>
-			<cfset col_table = "dba_tab_columns">
-		</cfif>
-
 	<cfquery name="qColumns" datasource="#variables.dsn#">
 		SELECT
 		 COLUMN_NAME AS name
-		FROM #col_table#
-		WHERE upper(table_name) = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ucase(arguments.table)#">
-		AND column_id = 2
+		FROM INFORMATION_SCHEMA.Columns  
+		WHERE table_name = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.table#">
+		AND original_position = 2
 	</cfquery>
 
 	<cfset primaryColumn = qColumns.name >
@@ -177,97 +167,6 @@
 		<cfreturn alias>
 </cffunction>
 
-
-
-
-<!--- this will attempt to find the forign tables based on convention and database meta data --->
-<cffunction name="linkToTable" returntype="struct"  output="false">
-	<cfargument name="name" type="string" required="true">
-	<cfargument name="useStrictFind" type="boolean" required="false" default="false">
-
-	<cfset var Result = structNew()>
-	<cfset var fkTable = pluralize(replaceNoCase(arguments.name, "_id", ""))>
-
-	<cfset Result.result = false>
-	<cfset Result.tableList = "">
-	
-	<cfif right(arguments.name,3) eq "_id">
-
-		<cfset Result.result = true>
-		<!--- make sure by looking it up --->
-		<cfset Result.tableQ = getTables(filter=fkTable, match='exact')>
-		<!--- if 1 record, you got it --->
-		<cfset Result.tableList =valueList(Result.tableQ.name)>
-
-	</cfif>
-
-	<cfreturn Result>
-</cffunction>
-
-
-<!---    Date: 2/1/2009 Usage: gets a table list of all tables with fk conenctions --->
-<cffunction name="getFKTables" output="false" access="public" returntype="array" hint="gets a table list of all tables with fk conenctions">
-   <cfargument name="table_name"  type="string" required="true"/>
-
-	<cfset var result = false>
-	<cfset var fkConn = arrayNew(2)>
-	<cfset var index = 0>
-	<!--- get all columns in table, loop through and look for "_id" --->
-	<cfset var qcolumns = getColumns(table=arguments.table_name)>
-
-	<cfoutput query="qColumns">
-		<cfif findNoCase("_id",name)>
-			<cfset result = linkToTable(name)>
-
-			<cfif result.result>
-				<cfset index++>
-				<cfset fkConn[index][1] =   "#result.tableList#">
-				<cfset fkConn[index][2] =   "#qcolumns.name#">
-			</cfif>
-		</cfif>
-	</cfoutput>
-
-	<cfreturn fkConn>
-
-</cffunction>
-
-
-
-
-<!--- todo: please explain --->
-<!---    Date: 2/1/2009 Usage: gets a table list of all tables with fk conenctions --->
-<cffunction name="getFKColumns" output="false" access="public" returntype="string" hint="gets a table list of all tables with fk conenctions">
-   <cfargument name="table_name"  type="string" required="true"/>
-
-	<cfset var result = false>
-	<cfset var fkList = "">
-
-	<cfset var qcolumns = getColumns(table=arguments.table_name)>
-
-	<cfoutput query="qColumns">
-		<cfif findNoCase("_id",name)>
-			<cfif result.result>
-				<cfset fkList =   "#fkList#,#name#">
-			</cfif>
-		</cfif>
-	</cfoutput>
-
-	<cfreturn fkList>
-
-</cffunction>
-
-<cffunction name="getSequences" access="public" output="false" returntype="Query">
-	<cfargument name="filter" type="string" required="false" default="">
-
-	<cfquery name="qTables" datasource="#variables.dsn#">
-		SELECT sequence_name AS sequence
-		FROM user_sequences
-		WHERE upper(sequence_name) LIKE '#ucase(arguments.filter)#%'
-		ORDER BY sequence_name
-	</cfquery>
-
-	<cfreturn qTables />
-</cffunction>
 
 
 <cffunction name="translateType" access="public" output="false" returnType="struct">
@@ -356,19 +255,7 @@
 	
 </cffunction>
 
-<cffunction name="init" returntype="scaffolder">
-	<cfargument name="dsn" required="false" type="string" default="urapply">
-	<cfargument name="is_banner" required="false" type="numeric" default="0">
 
-		<cfset variables.dsn ="#arguments.dsn#">
-
-		<cfif isDefined("arguments.is_banner")>
-			<cfset variables.is_banner ="#arguments.is_banner#">
-		</cfif>
-
-	<cfreturn this>
-
-</cffunction>
 
 
 <!--- messy and/or unecessary --->

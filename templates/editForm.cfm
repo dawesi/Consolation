@@ -4,7 +4,7 @@
 #chr(60)#cfimport prefix="form"  taglib="/#appMapping#/includes/tags/form"  >
 
 <cfloop query="qColumns">
-#builderService.writeParam(consoleRequest.modelname,findAlias(qColumns.name, consoleRequest.params),qColumns.defaultData,"U")#
+#builderService.writeParam(consoleRequest.modelname,findAlias(qColumns.name, consoleRequest.params),qColumns.defaultValue,"U")#
 </cfloop>
 
 #chr(60)#form name="form" action="#chr(60)#cfoutput>##cgi.script_name##/#consoleRequest.modelName#/Save/ID/##rc.#consoleRequest.modelName#.id###chr(60)#/cfoutput>" id="form" method="post" class="formContainer">
@@ -12,21 +12,25 @@
 <div class="formContainer">
 
 <cfloop query="qColumns">
-<cfset colParams = scaffoldService.getColumnParams(type=qColumns.type, precision=qColumns.precision, length=qColumns.length)>
+
+	
+<cfset colParams = scaffoldService.getFieldElements({name=qColumns.name, type=qColumns.type, precision=qColumns.precision, length=qColumns.length})>
+
+
 <cfif right(qColumns.name, 3) eq "_id">
 
 	<cfset model = scaffoldService.camelCase(replaceNoCase(qColumns.name, "_id", ""))>
 	<cfset collection = scaffoldService.pluralize(model)>
 	<cfset collectionTable = scaffoldService.tableFormat(scaffoldService.pluralize(model))>
-	<cfset displayField = scaffoldService.getPrimaryColumn(collectionTable)>
+	<cfset displayField = dbService.getPrimaryColumn(collectionTable)>
 	#builderService.build(
 			element="select",
 			type=colParams.type,
-			label=scaffoldService.humanize(findAlias(model, consoleRequest.params)),
+			label=colParams.label,
 			name=findAlias(qColumns.name, consoleRequest.params),
-			max=colParams.length,
-			size=colParams.length,
-			default=qColumns.defaultData,
+			max=colParams.max,
+			size=colParams.size,
+			default=qColumns.defaultValue,
 			hidden=false,
 			source="#consoleRequest.modelName#",
 			model="##rc."&collection&"##",
@@ -36,11 +40,11 @@
 	#builderService.build(
 			element=colParams.element,
 			type=colParams.type,
-			label=scaffoldService.humanize(findAlias(qColumns.name, consoleRequest.params)),
+			label=colParams.label,
 			name=findAlias(qColumns.name, consoleRequest.params),		
-			max=colParams.length,
-			size=colParams.length,
-			default=qColumns.defaultData,
+			max=colParams.max,
+			size=colParams.max,
+			default=qColumns.defaultValue,
 			hidden=false,
 			required=isRequired(qColumns.name, consoleRequest.params))#
 

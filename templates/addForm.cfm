@@ -3,10 +3,10 @@
 #chr(60)#!--- generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified --->
 #chr(60)#cfimport prefix="form"  taglib="/#appMapping#/includes/tags/form"  >
 
-
+<cfdump var="#columns#" format="text">
 
 <cfloop query="qColumns">
-	#builderService.writeParam(consoleRequest.modelname, findAlias(qColumns.name, consoleRequest.params),qColumns.defaultData,"I")#
+	#builderService.writeParam(consoleRequest.modelname, qColumns.name, qColumns.defaultValue,"I")#
 </cfloop>
 
 #chr(60)#form name="form" action="#chr(60)#cfoutput>##cgi.script_name##/#consoleRequest.modelName#/Save#chr(60)#/cfoutput>" id="form" method="post" class="formContainer">
@@ -15,7 +15,7 @@
 
 <cfloop query="qColumns">
 
-<cfset colParams = scaffoldService.getColumnParams(type=qColumns.type, precision=qColumns.precision, length=qColumns.length)>
+ <cfset colParams = scaffoldService.getFieldElements({name=qColumns.name, type=qColumns.type, precision=qColumns.precision, length=qColumns.length})>
 
 
 
@@ -24,32 +24,33 @@
 	<cfset model = scaffoldService.camelCase(replaceNoCase(qColumns.name, "_id", ""))>
 	<cfset collection = scaffoldService.pluralize(model)>
 	<cfset collectionTable = scaffoldService.tableFormat(scaffoldService.pluralize(model))>
+		
 		#builderService.build(
 				element="select",
 				type=colParams.type,
-				label=scaffoldService.humanize(findAlias(model, consoleRequest.params)),
+				label=colParams.label,
 				name=findAlias(qColumns.name, consoleRequest.params),
-				max=colParams.length,
-				size=colParams.length,
-				default=qColumns.defaultData,
+				max=colParams.max,
+				size=colParams.size,
+				default=qColumns.defaultValue,
 				hidden=false,
 				source="model",
 				model="##rc."&collection&"##",
 				valueField="id",
-				displayField=scaffoldService.getPrimaryColumn(collectionTable),
+				displayField=dbService.getPrimaryColumn(collectionTable),
 				required=isRequired(qColumns.name, consoleRequest.params),
-				meta=scaffoldService.getPrimaryColumn(scaffoldService.tableFormat(model))	)#
+				meta=dbService.getPrimaryColumn(scaffoldService.tableFormat(model))	)#
 
 	<cfelse>
 		
 		#builderService.build(
 				element=colParams.element,
 				type=colParams.type,
-				label=scaffoldService.humanize(findAlias(qColumns.name, consoleRequest.params)),
+				label=colParams.label,
 				name=findAlias(qColumns.name, consoleRequest.params),		
-				max=colParams.length,
-				size=colParams.length,
-				default=qColumns.defaultData,
+				max=colParams.max,
+				size=colParams.size,
+				default=qColumns.defaultValue,
 				hidden=false,
 				required=isRequired(qColumns.name, consoleRequest.params))#
 

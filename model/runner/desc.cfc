@@ -1,16 +1,16 @@
 ﻿<cfcomponent>
 	<cfproperty name="scaffoldService" inject="id:scaffoldService" >
+	<cfproperty name="dbService" inject="id:dbService" >
+
 
 <cffunction name="execute" access="public" output="false" returnType="array">
 	<cfargument name="consoleRequest" type="struct" required="true" hint="">
-	
+
 	<cfset var response = {}>
 	<cfset response.result = "">
 	<cfset response.messages = []>
 	
-	
-
-<cfset cols = scaffoldService.getColumns(table=consoleRequest.table)>
+<cfset cols = dbService.getColumns(table=consoleRequest.table)>
 
 <cfsavecontent variable="descText">
 

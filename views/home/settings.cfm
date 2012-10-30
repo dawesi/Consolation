@@ -1,1 +1,1 @@
-﻿<cfdump var="#getModuleSettings("consolation")#">
+﻿<cfdump var="#rc#">

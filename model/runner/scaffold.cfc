@@ -1,41 +1,41 @@
-<cfcomponent>
+#a<cfcomponent>
 
 <cfproperty name="scaffoldService" inject="id:scaffoldService" >
-<cfproperty name="schemaChangeService" inject="id:schemaChangeService" >
-<cfproperty name="cfcObjectService" inject="id:cfcObjectService" >
+<cfproperty name="dbService" inject="id:dbService" >
 
+<cfproperty name="cfcObjectService" inject="id:cfcObjectService" >
 <cfproperty name="validatorService" inject="id:validatorService" >
 <cfproperty name="sqlWriterService" inject="id:sqlWriterService" >
 <cfproperty name="builderService" inject="id:builderService" >
 
-<cffunction name="getdsn" rreturntype="string" >
-	<cfreturn "peeps">
-</cffunction>
+<cfproperty name="consoleConfig" inject="coldbox:setting:consolation" >
 
-<cffunction name="getRoot" rreturntype="string" >
-	<cfreturn "peeps/">
-</cffunction>
+
 
 <cffunction name="execute" access="public" output="false" returnType="any">
 	<cfargument name="consoleRequest" type="struct" required="true" hint="">
-	<cfargument name="consoleConfig" type="struct" required="true" hint="">
-	<cfargument name="applicationRoot" type="string" required="true" hint="">
-	<cfargument name="appMapping" type="string" required="true" hint="">
-	
+		
 	<cfset var result = {}>
 	<cfset result.messages = []>	
 	<cfset result.response = {}>
+	<cfset applicationroot = consoleconfig.fileRoot> 
+	<cfset appMapping = consoleconfig.appRoot>
 	
-	<cfset applicationroot = arguments.applicationRoot>	
-	<cfset appMapping = arguments.appMapping>	
+	<cfset boilercols = ["addedOn", "updatedOn", "addedBy", "updatedBy", "id", "sortOrder", "isDeleted"]>
+	
 	<!--- move to cfc --->
 	<cfset result.messages = arrayNew(1)>
 
 	<cfset columnList = "">
 	
 	
+	
+		
 	<!--- Generate the table column list from the parameters passed in --->
 	<!--- to function --->	
+	
+	
+	<!---todo: encapsulate in function --->
 	<cfloop array="#consoleRequest.params#" index="p">
 		<cfset paramString = listGetAt(p, 1, " ")>
 		<cfset paramItem = listFirst(paramString, ":")>
@@ -68,12 +68,18 @@
 	
 	
 	
-	<cfset qColumns = scaffoldService.getColumns(table=consoleRequest.table, columns=columnList)>
+	<cfset qColumns = dbService.getColumns(table=consoleRequest.table, columns=columnList)>
 		
 	<!--- if you can find the table based on the naming conventions, pas in the exact entry --->
 	<cfif qColumns.recordCount eq 0>
-		<cfset qColumns = scaffoldService.getColumns(table=consoleRequest.table)>
+		<cfset qColumns = dbService.getColumns(table=consoleRequest.table)>
 	</cfif>
+	
+	<cfset var columns = []>
+	<cfloop query="qColumns">
+			<cfset arrayAppend(columns, scaffoldService.getFieldElements({name=qColumns.name, type=qColumns.type, precision=qColumns.precision, length=qColumns.length}))>
+	</cfloop>
+	
 
 	<!--- -------------------------- -------------------------- -------------------------- -------------------------- --->	
 
@@ -120,6 +126,12 @@
 	<cfif not directoryexists("#mockLocation#")>
 		<cfdirectory action="create" directory="#mockLocation#" >
 		<cfset arrayAppend(result.messages, 'mock directory created')>
+	</cfif>
+
+
+	<cfif not directoryexists("#serviceLocation#")>
+		<cfdirectory action="create" directory="#serviceLocation#" >
+		<cfset arrayAppend(result.messages, 'services directory created')>
 	</cfif>
 
 
@@ -199,8 +211,8 @@
 
 
 <cfif consoleRequest.file eq "service" OR consoleRequest.file eq "all">
-	<cfinclude template="../../templates/serviceGateway.cfm">
-	<cffile action="write"  file="#serviceLocation#/#consoleRequest.name#ServiceGateway.cfc" output="#gatewayCode#" nameconflict="overwrite" >	
+	<cfinclude template="../../templates/ServiceGateway.cfm">
+	<cffile action="write"  file="#serviceLocation#/#consoleRequest.name#Service.cfc" output="#gatewayCode#" nameconflict="overwrite" >	
 	<cfset arrayAppend(result.messages, 'service gateway view created')>
 </cfif>
 <!---
@@ -227,7 +239,7 @@
 	<cffile action="write"  file="#mockModelLocation#/_#consoleRequest.name#Model.cfc" output="#mockModelCode#" nameconflict="overwrite" >
 	<cfset arrayAppend(result.messages, 'Mock #consoleRequest.name# Model  created')>
 	
-	<cfset injectItResultText =  injectIt(consoleRequest.name, applicationroot)>
+	<!---<cfset injectItResultText =  injectIt(consoleRequest.name, applicationroot)>--->
 	
 </cfif>
 
@@ -290,7 +302,7 @@
 				
 	</cffunction>
 
-<cffunction name="injectIt" returntype="String" >
+<!---<cffunction name="injectIt" returntype="String" >
 	<cfargument name="model" type="string" required="true" hint="">
 	<cfargument name="applicationRoot" type="string" required="true" hint="">
 	
@@ -312,8 +324,8 @@
 	
 	function getMock#model#Service(){
 		setup();
-		var service = mockbox.createMock("urapply.services.#model#ServiceGateway");
-		var mock#model#Model = createObject("urapply.test.mocks.models._#model#Model");
+		var service = mockbox.createMock("#appMapping#.services.#model#Service");
+		var mock#model#Model = createObject("#appMapping#.test.mocks.models._#model#Model");
 		service.$property("coreModel", "variables", mock#model#Model);
 		
 		return service;
@@ -342,7 +354,7 @@
 	</cfif>
 
 </cffunction>
-
+--->
 <cffunction name="wireIt" returntype="String" >
 	<cfargument name="model" type="string" required="true" hint="">
 	<cfargument name="applicationRoot" type="string" required="true" hint="">
@@ -351,7 +363,7 @@
 
 
 	<cfset var modelMappingTExt = 'map("#model#Model").to("#appMapping#.model.#model#").asSingleton();'>
-	<cfset var serviceMappingTExt = 'map("#model#Service").to("#appMapping#.services.#model#ServiceGateWay").asSingleton();'>
+	<cfset var serviceMappingTExt = 'map("#model#Service").to("#appMapping#.services.#model#Service").asSingleton();'>
 	
 	
 	<cfset var compareCheck = FindNoCase(modelMappingTExt, wireboxContent)>

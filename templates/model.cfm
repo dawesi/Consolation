@@ -1,16 +1,16 @@
 <cfset table_prefix = lcase(left(consoleRequest.tablename, 1))>
-<!--- get an array  of all the tables with f-keys --->
-<cfset fTables = scaffoldService.getfkTables(consoleRequest.tableName)>
+
+<cfset fTables = dbService.getfkTables(consoleRequest.tableName)>
+
+
+
+
+
 
 <cfsavecontent variable="cfcCode">
-
-
-
-
 <cfoutput>
 #chr(60)#!--- generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified --->
 #chr(60)#cfcomponent  displayname="#consoleRequest.name#" extends="baseModel" output="false">
-	
 
 <!--- get a list of all primary table columns and filter out any matching colums from foriegn tables --->
 <cfset primaryTableColumnList = valueList(qColumns.name, ",")>
@@ -18,9 +18,6 @@
 <!--- create two lists to keep track of what table aliases we've used' --->
 <cfset usedPrefixList = left(consoleRequest.tableName, 1)>
 <cfset usedPrefixListForJoins = left(consoleRequest.tableName, 1)>
-
-
-
 
 #chr(60)#cffunction name="getTableName" access="private" output="false" returntype="string">
 	#chr(60)#cfreturn "#consoleRequest.tableName#">
@@ -50,10 +47,10 @@
 </cfoutput>
 <cfoutput>
 	#lcase(table_prefix)#.id as id,
-	#lcase(table_prefix)#.added_by as addedBy,
+	#lcase(table_prefix)#.addedB_by as addedBy,
 	#lcase(table_prefix)#.updated_by as updatedBy,
-	#lcase(table_prefix)#.added_Date as addedDate,
-	#lcase(table_prefix)#.updated_date as updateDate,
+	#lcase(table_prefix)#.added_on as addedOn,
+	#lcase(table_prefix)#.updated_on as updateOn,
 	#lcase(table_prefix)#.is_deleted as isDeleted,
 	#lcase(table_prefix)#.sort_order as sortOrder,
 </cfoutput>
@@ -169,13 +166,13 @@
 	#chr(60)#cfquery datasource="##getDSN()##">
 	INSERT INTO ##getDbo()##.#lcase(consoleRequest.tableName)# 
 	(id, <cfloop query="qColumns">
-		<cfif not listFindNoCase("id,sort_order,added_date,updated_date,added_by,updated_by", qColumns.name, ",")>#lcase(qColumns.name)#, </cfif></cfloop>sort_order, added_by, updated_by,added_date,updated_date)
+		<cfif not listFindNoCase("id,sort_order,added_on,updated_on,added_by,updated_by", qColumns.name, ",")>#lcase(qColumns.name)#, </cfif></cfloop>sort_order, added_by, updated_by,added_date,updated_date)
 	
 	VALUES (##newID##,
 	<cfloop query="qColumns">
-		<cfif not listFindNoCase("id,added_date,updated_date,added_by,updated_by,sort_order", qColumns.name, ",")>
+		<cfif not listFindNoCase("id,added_on,updated_on,added_by,updated_by,sort_order", qColumns.name, ",")>
 			#chr(60)#cfif isDefined("arguments.data.#findAlias(qColumns.Name, consoleRequest.params)#")>
-			#sqlWriterService.wrapAsParam(type=qColumns.type,name=findAlias(qColumns.Name, consoleRequest.params))# #chr(60)#cfelse><cfif findNoCase("is", qColumns.name) or findNoCase("has", qColumns.name)>0<cfelse>NULL</cfif>#chr(60)#/cfif>,
+			#sqlWriterService.wrapAsParam(type=qColumns.type,name=qColumns.Name)# #chr(60)#cfelse><cfif findNoCase("is", qColumns.name) or findNoCase("has", qColumns.name)>0<cfelse>NULL</cfif>#chr(60)#/cfif>,
 		</cfif>
 	</cfloop>
 		
@@ -190,8 +187,8 @@
 		#chr(60)#cfqueryparam cfsqltype="cf_sql_numeric" value="##arguments.data.addedBy##"> #chr(60)#cfelse>0#chr(60)#/cfif>,
 		
 	
-	sysdate,
-	sysdate
+	getDate(),
+	getDate()
 	)
 	#chr(60)#/cfquery>
 	</cfoutput>
@@ -243,7 +240,7 @@
 	
 	#chr(60)#cfif isDefined("arguments.data.updatedBy")>
 	updated_by = #chr(60)#cfqueryparam cfsqltype="cf_sql_numeric" value="##arguments.data.updatedBy##"> , #chr(60)#/cfif>
-	updated_date = sysdate
+	updated_on = getDate()
 	
 		#chr(60)#cfif isDefined("variables.ID")>
 			WHERE #table_prefix#.id = #chr(60)#cfqueryparam cfsqltype="cf_sql_numeric" value="##variables.ID##">
@@ -323,21 +320,24 @@
 
 <cfloop query="qColumns"><cfsilent>
 <!--- todo: make this a function --->
-		<cfset ptype = qColumns.type>
-		<cfset plabel = scaffoldService.humanize(findAlias(qColumns.name, consoleRequest.params))>
-		<cfset pname = findAlias(qColumns.name, consoleRequest.params) >
-		<cfset psize = qColumns.length>
-		<cfset pmax = qColumns.length>
-		<cfset prequired = isRequired(qColumns.name, consoleRequest.params)>
-
-<!---		<cfset dd_value = listGetAt(form.dd_value, i)>
-		<cfset dd_display = listGetAt(form.dd_display, i)>
-		<cfset dd_default = listGetAt(form.dd_default, i)>
---->
+		<cfset p = {}>
+		<cfset p.type = qColumns.type>
+		<cfset p.name = qColumns.name>
+		<cfset p.length = qColumns.length>
+		<cfset p.precision = qColumns.precision>	
 		
+		
+		<cfset fieldParams = scaffoldService.getFieldElements(p)>
+		
+		<cfset fieldParams.required = isRequired(qColumns.name, consoleRequest.params)>
+
+
 	</cfsilent>	
-<cfif not listFindNoCase("updated_by,updated_on,updated_by,added_by", pname, ",")>
-	#validatorService.validateProperty(type=ptype,name=pname,max=pmax,label=plabel,required=prequired)#</cfif>
+
+	<cfif not listFindNoCase("updated_by,updated_on,updated_by,added_by", fieldParams.name, ",")>
+		#validatorService.validateProperty(type=fieldParams.type,name=fieldParams.name,max=fieldParams.max,label=fieldParams.label,required=fieldParams.required)#
+	</cfif>
+
 </cfloop>
 
 

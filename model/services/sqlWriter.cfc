@@ -56,7 +56,7 @@
 		
 	<cfswitch expression="#arguments.type#">
 
-		<cfcase value="varchar2">
+		<cfcase value="text,textarea" delimiters=",">
 			<cfset output = '<cfqueryparam cfsqltype="cf_sql_varchar" value="##superHtmlEditFormat(arguments.data.#arguments.name#)##">'>
 		</cfcase>
 		
@@ -72,6 +72,9 @@
 			<cfset output = '<cfqueryparam cfsqltype="cf_sql_numeric" value="##arguments.data.#arguments.name###">'>
 		</cfcase>	
 
+		<cfdefaultcase>
+			<cfset output = '<cfqueryparam cfsqltype="cf_sql_numeric" value="##arguments.data.#arguments.name###">'>
+		</cfdefaultcase>
 	</cfswitch>
 			
 			<cfreturn output>

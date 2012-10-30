@@ -1,4 +1,4 @@
-﻿<cfset fTables = scaffoldService.getfkTables(consoleRequest.tableName)>
+﻿<cfset fTables = dbService.getfkTables(consoleRequest.tableName)>
 <cfsavecontent variable="ModelTestCode">	<cfoutput>// generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified
 component extends="coldbox.system.testing.BaseModelTest" model="#appMapping#.model.#consolerequest.name#"   {
 

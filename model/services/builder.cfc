@@ -1,5 +1,5 @@
 ﻿<cfcomponent  extends="scaffoldUtility">
-
+	
 <cffunction name="init" returntype="builder">	
 	<cfreturn this>
 </cffunction>

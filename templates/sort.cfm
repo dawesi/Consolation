@@ -3,7 +3,7 @@
 <cfset modelNamePlural = scaffoldService.pluralize(consoleRequest.name)>
 
 <cfset collectionTable = scaffoldService.tableFormat(modelNamePlural)>
-<cfset primaryColumn =	scaffoldService.getPrimaryColumn(collectionTable)>
+<cfset primaryColumn =	dbService.getPrimaryColumn(collectionTable)>
 
 <cfsavecontent variable="Sort">
 <cfoutput>

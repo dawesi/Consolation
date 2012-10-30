@@ -12,7 +12,7 @@ component  extends="coldbox.system.testing.BaseTestCase" appMapping="/"#appMappi
 		mb = getMockBox();
 		cache = getCacheBox().getCache("default");
 		
-		service = createObject("component", "urapply.services.#modelNameSingular#ServiceGateway");
+		service = createObject("component", "urapply.services.#modelNameSingular#Service");
 		mockery = createObject("component", "urapply.test.mocks.injectMockery");
 		mockCore = createObject("component", "urapply.test.mocks.models._#modelNameSingular#Model");
 		mb.prepareMock(service);

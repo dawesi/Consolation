@@ -31,18 +31,15 @@
 			dsn="peeps",
 			dbo="dbo",
 			dbtype="mssql",
-			appRoot='/'
+			appRoot='/peeps'
 		};
 		
 		// Layout Settings
 		layoutSettings = {
 			defaultLayout = "layout.cfm"
-		};
+			};
 		
-		// datasources
-		datasources = {
-		
-		};
+	
 		
 		// web services
 		webservices = {
@@ -61,13 +58,13 @@
 		
 		// Custom Declared Interceptors
 		interceptors = [
-		{class="modules.consolation.interceptors.consoleConfig",
-			 properties={}
-			}
 		];
 		binder.map("parser").to("#moduleMapping#.model.services.parser");
-		binder.map("scaffoldService").to("#moduleMapping#.model.services.scaffolder");
-		binder.map("schemaChangeService").to("#moduleMapping#.model.schemaChange");
+		
+		binder.map("scaffoldService").to("#moduleMapping#.model.services.#settings.dbType#.scaffolder");
+		binder.map("dbService").to("#moduleMapping#.model.services.#settings.dbType#.db");
+		binder.map("schemaChangeService").to("#moduleMapping#.model.services.#settings.dbType#.schemaChange");
+		
 		binder.map("cfcObjectService").to("#moduleMapping#.model.services.cfcobject");
 		binder.map("builderService").to("#moduleMapping#.model.services.builder");
 		binder.map("sqlWriterService").to("#moduleMapping#.model.services.sqlWriter");
