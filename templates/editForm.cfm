@@ -3,8 +3,8 @@
 #chr(60)#!--- generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified --->
 #chr(60)#cfimport prefix="form"  taglib="/#appMapping#/includes/tags/form"  >
 
-<cfloop query="qColumns">
-#builderService.writeParam(consoleRequest.modelname,findAlias(qColumns.name, consoleRequest.params),qColumns.defaultValue,"U")#
+<cfloop array="#columns#" index="col">
+	#builderService.writeParam(model=consoleRequest.modelname, name=col.name, formType="update")#
 </cfloop>
 
 #chr(60)#form name="form" action="#chr(60)#cfoutput>##cgi.script_name##/#consoleRequest.modelName#/Save/ID/##rc.#consoleRequest.modelName#.id###chr(60)#/cfoutput>" id="form" method="post" class="formContainer">

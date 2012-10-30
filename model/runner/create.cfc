@@ -18,7 +18,7 @@
 
 <cfsavecontent variable="tableSQL">	
 <cfoutput>
-	create table #dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#
+	create table #consoleConfig.dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#
 	(
 	 #scaffoldService.writeID()#
 	 
@@ -32,13 +32,13 @@
 </cfsavecontent>
 
 
-	<cfset tableDropSQL = 'drop table #dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#'>
+	<cfset tableDropSQL = 'drop table #consoleConfig.dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#'>
 
 
 
 	<cftry>
 			<cfquery  datasource="#consoleconfig.dsn#">
-			drop table #dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#
+			drop table #consoleConfig.dbo#.#scaffoldService.deCamelCase(consoleRequest.table)#
 			</cfquery>
 			<cfset arrayAppend(result.messages, "table was dropped")>
 		<cfcatch>

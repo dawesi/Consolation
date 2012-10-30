@@ -1,9 +1,5 @@
 <cfset table_prefix = lcase(left(consoleRequest.tablename, 1))>
-
 <cfset fTables = dbService.getfkTables(consoleRequest.tableName)>
-
-
-
 
 
 
@@ -11,6 +7,9 @@
 <cfoutput>
 #chr(60)#!--- generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified --->
 #chr(60)#cfcomponent  displayname="#consoleRequest.name#" extends="baseModel" output="false">
+
+
+<cfdump var="#columns#" format="text" >
 
 <!--- get a list of all primary table columns and filter out any matching colums from foriegn tables --->
 <cfset primaryTableColumnList = valueList(qColumns.name, ",")>
@@ -47,16 +46,19 @@
 </cfoutput>
 <cfoutput>
 	#lcase(table_prefix)#.id as id,
-	#lcase(table_prefix)#.addedB_by as addedBy,
+	#lcase(table_prefix)#.added_by as addedBy,
 	#lcase(table_prefix)#.updated_by as updatedBy,
 	#lcase(table_prefix)#.added_on as addedOn,
 	#lcase(table_prefix)#.updated_on as updateOn,
 	#lcase(table_prefix)#.is_deleted as isDeleted,
 	#lcase(table_prefix)#.sort_order as sortOrder,
-</cfoutput>
 
-<cfoutput query="qColumns">
-#chr(13)##chr(9)##chr(9)# #lcase("#table_prefix#.#qColumns.name#")# as 	#findAlias(qColumns.Name, consoleRequest.params)# <cfif qColumns.currentrow neq qColumns.recordcount>, </cfif>
+	<cfset index = 1>
+	<cfloop array="#columns#" index="col">
+		#chr(13)##chr(9)##chr(9)# #lcase("#table_prefix#.#col.column#")# as 	#col.name# <cfif index neq columns.size()>,</cfif> 
+		<cfset index++>
+	</cfloop>
+
 </cfoutput>			
 
 	<cfoutput>
@@ -140,23 +142,11 @@
 	#chr(60)#!--- ADD METHOD FOR CFC --->
 	#chr(60)#!--- --------------------------------- --->
 	
-	
 
-	
-	
-	#chr(60)#!--- ADD METHOD FOR CFC --->
-	#chr(60)#!--- --------------------------------- --->
-	
-	
 
 #chr(60)#cffunction name="add" access="public" output="false" returntype="numeric">
 	
 	#chr(60)#cfargument name="data" type="struct" required="true">
-	
-	#chr(60)#cfset var newID = getNewID()>
-	#chr(60)#cfset var qCheck = false>
-	
-			
 			
 	<cfset listI = 0>
 </cfoutput>
@@ -165,14 +155,15 @@
 	<cfoutput>
 	#chr(60)#cfquery datasource="##getDSN()##">
 	INSERT INTO ##getDbo()##.#lcase(consoleRequest.tableName)# 
-	(id, <cfloop query="qColumns">
-		<cfif not listFindNoCase("id,sort_order,added_on,updated_on,added_by,updated_by", qColumns.name, ",")>#lcase(qColumns.name)#, </cfif></cfloop>sort_order, added_by, updated_by,added_date,updated_date)
+	(<cfloop query="qColumns">
+		<cfif not listFindNoCase("id,sort_order,added_on,updated_on,added_by,updated_by", qColumns.name, ",")>#lcase(qColumns.name)#, </cfif></cfloop>sort_order, added_by, updated_by,added_on,updated_on)
 	
-	VALUES (##newID##,
-	<cfloop query="qColumns">
-		<cfif not listFindNoCase("id,added_on,updated_on,added_by,updated_by,sort_order", qColumns.name, ",")>
-			#chr(60)#cfif isDefined("arguments.data.#findAlias(qColumns.Name, consoleRequest.params)#")>
-			#sqlWriterService.wrapAsParam(type=qColumns.type,name=qColumns.Name)# #chr(60)#cfelse><cfif findNoCase("is", qColumns.name) or findNoCase("has", qColumns.name)>0<cfelse>NULL</cfif>#chr(60)#/cfif>,
+	VALUES (
+	
+	<cfloop array="#columns#" index="col">
+		<cfif not listFindNoCase("id,added_on,updated_on,added_by,updated_by,sort_order", col.column, ",")>
+			#chr(60)#cfif isDefined("arguments.data.#col.Name#")>
+			#sqlWriterService.wrapAsParam(type=col.field,name=col.Name)# #chr(60)#cfelse><cfif col.field eq "boolean">0<cfelse>NULL</cfif>#chr(60)#/cfif>,
 		</cfif>
 	</cfloop>
 		
@@ -191,6 +182,10 @@
 	getDate()
 	)
 	#chr(60)#/cfquery>
+	
+	#chr(60)#cfset var newID = getLastID()>
+	#chr(60)#cfreturn newid>
+	
 	</cfoutput>
 	</cfsavecontent>
 				
@@ -228,9 +223,8 @@
 	#chr(60)#cfquery datasource="##getDSN()##">
 	UPDATE ##getDbo()##.#lcase(consoleRequest.tableName)# 
 	SET
-	<cfloop query="qColumns">
-	<cfif  not listFindNoCase("id,added_date,updated_date,added_by,updated_by,sort_order", name, ",")>
-	#sqlWriterService.writeUpdatePair(type=qColumns.type,name=lcase(qColumns.name), alias=findAlias(qColumns.name, consoleRequest.params) )#</cfif>
+	<cfloop array="#columns#" index="col">
+	#sqlWriterService.writeUpdatePair(type=col.field,name=col.name,column=col.column )##chr(10)#
 	</cfloop>
 	
 	

@@ -8,21 +8,21 @@
 <cffunction name="writeParam" returntype="string"  access="public" output ="false" description="This will take a form element type, name and default and write the cfparam for it">
 	
 	<cfargument name="model" type="string" required="true">
-	<cfargument name="property" type="string" required="true">
+	<cfargument name="name" type="string" required="true">
+	<cfargument name="formType" type="string" required="false" default="add">
 	<cfargument name="default" type="string" required="false" default="">
+		
+
 	
-	<cfargument name="formType" type="string" required="false" default="I">
+	<cfset var defaultvalue = "">
 	
-	<cfset arguments.property = camelCase(arguments.property)>
+	<cfif len(default)>
+		<cfset defaultvalue = default>
+	<cfelseif formType eq "update">
+		<cfset defaultvalue = "##rc.#arguments.model#.#arguments.name###"> 
+	</cfif>	
 			
-	<cfif arguments.formType eq "U">
-		<cfset code = '<cfparam name="form.#arguments.property#" default="##rc.#arguments.model#.#arguments.property###">
-	'> 
-			<cfelse>
-		<cfset code = '	<cfparam name="form.#arguments.property#" default="">		
-	'> 
-			</cfif>		
-	
+		<cfset code = '<cfparam name="form.#arguments.name#" default="#defaultvalue#">'> 
 		<cfreturn code>
 
 </cffunction>

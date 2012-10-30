@@ -118,10 +118,19 @@ struct function getFieldElements(params){
 	
 	var elements = {};
 	
-	elements.name = params.name;
+	elements.column = params.name;
+	elements.name = camelCase(params.name);
 	elements.type = params.type;
-	elements.label = humanize(params.name);
+	elements.label = humanize(elements.name);
+	
 	elements.element = "text";
+	elements.field = "text";
+	if(structkeyexists(params, "action") and params.action eq "update"){
+		elements.default = "##form.#elements.name###";
+	}
+	else{
+		elements.default = "##form.#elements.name###";
+	}
 	
 	
 	//rough settings
@@ -148,21 +157,24 @@ struct function getFieldElements(params){
 		elements.max = params.length;
 		elements.size = 35;
 		elements.element = "text";
-	
+		elements.field = "text";
 		if ( params.length gt 50){
 			elements.element = 'textarea';
-		}
+			elements.field = 'textarea';
+			}
 	
 		}
 	
 	
-	
+	else if(params.type eq "numeric" and right(params.name, 2) eq "id"){
+		elements.field = "select";
+	}
 	
 	
 	else if (params.type eq "numeric"){
 		elements.max = params.precision;
 		elements.size = 5;
-		elements.element = "text";
+		elements.field = "number";
 		elements.element = "number";
 	}
 	
@@ -171,13 +183,17 @@ struct function getFieldElements(params){
 		elements.size="15";
 		elements.max="15";
 		elements.element = "date";
+		elements.field = "date";
 		}
 	
 	else if ( params.type eq "bit"){
 		elements.size="1";
 		elements.max="1";
 		elements.element = "boolean";
+		elements.field = "boolean";
 	}
+	
+	
 	
 	
 	

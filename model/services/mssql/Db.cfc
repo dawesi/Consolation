@@ -21,7 +21,7 @@
 	<cfargument name="filter" type="string" required="false" default="">
 	<cfargument name="match" type="string" required="false" default="wildcard">
 
-	<cfquery name="qTables" datasource="#consoleConfg.dsn#">
+	<cfquery name="qTables" datasource="peeps">
 		SELECT 
 		 table_name as name
 		FROM INFORMATION_SCHEMA.tables

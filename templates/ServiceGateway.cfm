@@ -40,15 +40,15 @@ function transform(recordset, recursive=true){
 <cfoutput>		
 				 updatedBy= recordset["updatedBy"][i],
 				 addedBy= recordset["addedBy"][i],
-				 addedDate= recordset["addedDate"][i],
-				 updateDate= recordset["updateDate"][i],
+				 addedOn= recordset["addedOn"][i],
+				 updateOn= recordset["updateOn"][i],
 				 isDeleted= recordset["isDeleted"][i],
 				 sortOrder= recordset["sortOrder"][i]
 		 		};
 	 		
 	 	if(recursive){
 	 	<cfloop array="#relationArray#" index="s" >
-			var #modelNameSingular#.#s# = #s#Service.get(id=#modelNameSingular#Q["id"][i]);
+			var #modelNameSingular#.#s# = #s#Service.get(id=recordset["id"][i]);
 		</cfloop>	
 	 	}	
 	
@@ -85,7 +85,7 @@ function list(id="", recursive=true){
 	}	 
 
 
-function get(id, recursive){
+function get(id, recursive=false){
 	var result = list(id, recursive);
 	return result[1];
 	}

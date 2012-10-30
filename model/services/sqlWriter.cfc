@@ -2,45 +2,21 @@
 	
 <cffunction name="writeUpdatePair" access="public" output="false" returntype="string">
 			<cfargument name="name" type="string" required="true">
-			<cfargument name="alias" type="string" required="true">
+			<cfargument name="column" type="string" required="true">
 			<cfargument name="type" type="string" required="true">
 			<cfargument name="required" type="boolean" required="false" default="false">
-			<cfargument name="isLast" type="boolean" required="false" default="false">
 			<cfset var output = "">
 
 
-<cfif isDefined("arguments.alias")>
-	<cfset userInput = arguments.alias>
-<cfelse>
 	<cfset userInput = camelCase(arguments.name)>
-</cfif>
 
-<cfset output = '<cfif isDefined("arguments.data.#userInput#")>
-	'>
-			
-	<cfswitch expression="#arguments.type#">
 
-		<cfcase value="varchar2">
-			<cfset output = '#output##arguments.name# = #wrapAsParam(userInput,arguments.type)#'>
-		</cfcase>
+<cfset output = '<cfif isDefined("arguments.data.#name#")>#chr(10)#'>
+			<cfset output = '#output##column# = #wrapAsParam(name,type)##chr(10)#'>
 		
-		<cfcase value="number">
-			<cfset output = '#output##arguments.name# = #wrapAsParam(userInput,arguments.type)#'>
-		</cfcase>	
-			
-		<cfcase value="date">
-			<cfset output = '#output##arguments.name# = #wrapAsParam(userInput,arguments.type)#'>
-		</cfcase>				
-
-	</cfswitch>
-
-<cfif arguments.isLast>
-	<cfset output = '#output#'>
-</cfif>
 
 
-<cfset output = '#output#,</cfif>
-	'>
+<cfset output = '#output#,</cfif>#chr(10)#'>
 
 			<cfreturn output>
 			

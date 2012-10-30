@@ -13,12 +13,14 @@
 	
 	function getTextFieldElements(){
 		
-		var textresult = obj.getFieldElements({name="firstName", type="varchar", length="50", precision=""});
+		var textresult = obj.getFieldElements({name="first_name", type="varchar", length="50", precision=""});
 		debug(textresult);
 		
 		assertTrue(structkeyexists(textresult, "name"), "name should exist");
 		assertTrue(structkeyexists(textresult, "type"), "type should exist");
 		assertTrue(structkeyexists(textresult, "label"), "label should exist");
+		assertTrue(structkeyexists(textresult, "default"), "default should exist");
+		assertTrue(structkeyexists(textresult, "field"), "field should exist");
 		
 		assertTrue(structkeyexists(textresult, "size"), "size should exist");
 		assertTrue(isNumeric(textresult.size), 'size should be a number');
@@ -26,6 +28,9 @@
 		assertTrue(isNumeric(textresult.max), 'size should be a number');	
 		
 		assertEquals("text", textresult.element);	
+		assertEquals("firstName", textresult.name);
+		assertEquals("first_name", textresult.column);	
+		assertEquals("First Name", textresult.label);	
 		
 		assertTrue(50, textresult.max);
 		assertTrue(35, textresult.size);
@@ -34,45 +39,47 @@
 
 
 	function getTextAreaElements(){
-		var result = obj.getFieldElements({name="firstName", type="varchar", length="500", precision=""});
+		var result = obj.getFieldElements({name="first_ame", type="varchar", length="500", precision=""});
 		debug(result);
 		assertTrue(isNumeric(result.size), 'size should be a number');
 		assertTrue(isNumeric(result.max), 'size should be a number');	
 		assertEquals(35, result.size);
 		assertEquals(500, result.max);
 		assertEquals("textarea", result.element);
+		assertEquals("textarea", result.field);
 	}
 
 
 	function getDateFieldElements(){
-		var result = obj.getFieldElements({name="firstName", type="datetime", length="", precision=""});
+		var result = obj.getFieldElements({name="first_name", type="datetime", length="", precision=""});
 		debug(result);
 		assertTrue(isNumeric(result.size), 'size should be a number');
 		assertTrue(isNumeric(result.max), 'size should be a number');	
 		assertEquals(15, result.size);
 		assertEquals(15, result.max);
-		assertEquals("date", result.element);
+		assertEquals("date", result.field);
 	}
 
 
 	function getBitFieldElements(){
-		var result = obj.getFieldElements({name="isLive", type="bit", length="", precision=""});
+		var result = obj.getFieldElements({name="is_live", type="bit", length="", precision=""});
 		debug(result);
 		assertTrue(isNumeric(result.size), 'size should be a number');
 		assertTrue(isNumeric(result.max), 'size should be a number');	
 		assertEquals(1, result.size);
 		assertEquals(1, result.max);
-		assertEquals("boolean", result.element);
+		assertEquals("boolean", result.field);
 	}
 
 
 	function getNumberFieldElements(){
-		var result = obj.getFieldElements({name="firstName", type="numeric", length="", precision="9"});
+		var result = obj.getFieldElements({name="first_name", type="numeric", length="", precision="9"});
 		debug(result);
 		assertTrue(isNumeric(result.size), 'size should be a number');
 		assertTrue(isNumeric(result.max), 'size should be a number');	
 		assertEquals(5, result.size);
 		assertEquals(9, result.max);
+		assertEquals("number", result.field);
 	}
 
 

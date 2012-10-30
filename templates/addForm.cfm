@@ -3,56 +3,55 @@
 #chr(60)#!--- generated at #now()# by Consolation: Coldbox Code Generator // Delete once modified --->
 #chr(60)#cfimport prefix="form"  taglib="/#appMapping#/includes/tags/form"  >
 
-<cfdump var="#columns#" format="text">
 
-<cfloop query="qColumns">
-	#builderService.writeParam(consoleRequest.modelname, qColumns.name, qColumns.defaultValue,"I")#
+
+<cfloop array="#columns#" index="col">
+	#builderService.writeParam(model=consoleRequest.modelname, name=col.name, formType="add")##chr(10)#
 </cfloop>
 
+#chr(10)#
 #chr(60)#form name="form" action="#chr(60)#cfoutput>##cgi.script_name##/#consoleRequest.modelName#/Save#chr(60)#/cfoutput>" id="form" method="post" class="formContainer">
 
 <div class="formContainer">
 
-<cfloop query="qColumns">
-
- <cfset colParams = scaffoldService.getFieldElements({name=qColumns.name, type=qColumns.type, precision=qColumns.precision, length=qColumns.length})>
+<cfloop array="#columns#" index="col">
 
 
 
-<cfif right(qColumns.name, 3) eq "_id">
+
+
+<cfif col.field eq "select">
 	<!--- todo: singularize --->
-	<cfset model = scaffoldService.camelCase(replaceNoCase(qColumns.name, "_id", ""))>
+	<cfset model = scaffoldService.camelCase(replaceNoCase(col.name, "id", ""))>
 	<cfset collection = scaffoldService.pluralize(model)>
 	<cfset collectionTable = scaffoldService.tableFormat(scaffoldService.pluralize(model))>
 		
 		#builderService.build(
 				element="select",
-				type=colParams.type,
-				label=colParams.label,
-				name=findAlias(qColumns.name, consoleRequest.params),
-				max=colParams.max,
-				size=colParams.size,
-				default=qColumns.defaultValue,
+				type=col.type,
+				label=col.label,
+				name=col.name,
+				max=col.max,
+				size=col.size,
 				hidden=false,
 				source="model",
 				model="##rc."&collection&"##",
 				valueField="id",
 				displayField=dbService.getPrimaryColumn(collectionTable),
-				required=isRequired(qColumns.name, consoleRequest.params),
+				required=isRequired(col.name, consoleRequest.params),
 				meta=dbService.getPrimaryColumn(scaffoldService.tableFormat(model))	)#
 
 	<cfelse>
 		
 		#builderService.build(
-				element=colParams.element,
-				type=colParams.type,
-				label=colParams.label,
-				name=findAlias(qColumns.name, consoleRequest.params),		
-				max=colParams.max,
-				size=colParams.size,
-				default=qColumns.defaultValue,
+				element=col.field,
+				type=col.type,
+				label=col.label,
+				name=col.name,		
+				max=col.max,
+				size=col.size,
 				hidden=false,
-				required=isRequired(qColumns.name, consoleRequest.params))#
+				required=isRequired(col.name, consoleRequest.params))#
 
 
 
