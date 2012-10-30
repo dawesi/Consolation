@@ -1,0 +1,134 @@
+/* CSS Document */
+
+body {
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+	font-size:12px;
+}
+p, h1, form, button {
+	border:0;
+	margin:0;
+	padding:0;
+}
+.spacer {
+	clear:both;
+	height:1px;
+}
+/* ----------- My Form ----------- */
+.myform {
+	margin:0 auto;
+	width:485px;
+	padding:14px;
+}
+/* ----------- stylized ----------- */
+#stylized {
+	border:solid 2px #b7ddf2;
+	background:#ebf4fb;
+}
+#stylized h1 {
+	font-size:14px;
+	font-weight:bold;
+	margin-bottom:8px;
+}
+#stylized p {
+	font-size:11px;
+	color:#666666;
+	margin-bottom:20px;
+	border-bottom:solid 1px #b7ddf2;
+	padding-bottom:10px;
+}
+#stylized label {
+	display:block;
+	font-weight:bold;
+	text-align:right;
+	width:185px;
+	float:left;
+}
+#stylized .small {
+	color:#666666;
+	display:block;
+	font-size:11px;
+	font-weight:normal;
+	text-align:right;
+	width:185px;
+}
+#stylized input, #stylized select {
+	float:left;
+	font-size:12px;
+	padding:4px 2px;
+	border:solid 1px #aacfe4;
+	width:285px;
+	margin:2px 0 0 10px;
+}
+#stylized fieldset input {
+	width:261px;
+	display:block;
+}
+#stylized fieldset {
+	padding: 0.2em 0.5em;
+	border:1px solid #333;
+	margin-bottom:20px;
+}
+#stylized fieldset input.radio {
+	width:10px;
+	float:left;
+	padding-right:230px;
+}
+#stylized fieldset select {
+	width:auto;
+}
+#stylized textarea {
+	float:left;
+	height:300px;
+	font-size:12px;
+	padding:4px 2px;
+	border:solid 1px #aacfe4;
+	width:285px;
+	margin:2px 0 5px 10px;
+}
+#stylized button {
+	clear:both;
+	margin-left:195px;
+	width:125px;
+	height:31px;
+	background:#666666 url(img/button.png) no-repeat;
+	text-align:center;
+	line-height:31px;
+	color:#FFFFFF;
+	font-size:11px;
+	font-weight:bold;
+	cursor: pointer;
+	cursor: hand;
+}
+#stylized form label.error, label.error {
+	/* remove the next line when you have trouble in IE6 with labels in list */
+	color: #d71717;
+	font-style: italic;
+	width:448px;
+	border:1px solid #d71717;
+	text-align:left;
+	padding-left:30px;
+}
+div.error {
+	display: none;
+}
+input {
+	border: 1px solid black;
+}
+input.checkbox {
+	border: none
+}
+input:focus {
+	border: 1px dotted black;
+}
+input.error {
+	border: 1px dotted red;
+}
+.gray * {
+	color: gray;
+}
+.formrow {
+	margin-bottom:22px;
+	clear:both;
+	position:relative;
+	height:30px;
+}
